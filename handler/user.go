@@ -2,10 +2,13 @@ package handler
 
 import (
 	"context"
+	"crypto/sha512"
+	"fmt"
 	"go-microservice/global"
 	"go-microservice/model"
 	"go-microservice/proto"
 
+	"github.com/anaskhan96/go-password-encoder"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"gorm.io/gorm"
@@ -97,3 +100,30 @@ func (s *UserServer) 	GetUserById(ctx context.Context, req *proto.IdRequest) (*p
 	userInfoRsp := ModelToResponse(user)
 	return &userInfoRsp, nil
 }
+
+func (s *UserServer) CreateUser(ctx context.Context, req *proto.CreateUserInfo) (*proto.UserInfoResponse, error){
+	// check req
+	// check if user existed
+	var user model.User
+	result := global.DB.Where(&model.User{Mobile: req.Mobile}).First(&user)
+	if result.RowsAffected == 1 {
+		return nil, status.Error(codes.AlreadyExists, "User existed")
+	}
+	// create user object
+	user.Mobile = req.Mobile
+	user.NickName = req.Nickname
+
+	options := &password.Options{16, 100, 32, sha512.New}
+	salt, encodedPwd := password.Encode(req.Password, options)
+	newPassword := fmt.Sprintf("$pbkdf2-sha512$%s$%s", salt, &encodedPwd)
+	user.Password = newPassword
+	// save to db
+	result = global.DB.Create((&user))
+	if result.Error != nil {
+		return nil, status.Errorf(codes.Internal, result.Error.Error())
+	}
+	userInfoRsp := ModelToResponse(user)
+	return &userInfoRsp, nil
+
+}
+// UpdateUser(context.Context, *UpdateUserInfo) (*emptypb.Empty, error)

@@ -1,17 +1,13 @@
 package main
 
 import (
-	"crypto/md5"
-	"encoding/hex"
-	"go-microservice/model"
-	"log"
+	"crypto/sha512"
+	"fmt"
 	"math/rand"
-	"os"
+	"strings"
 	"time"
 
-	"gorm.io/driver/mysql"
-	"gorm.io/gorm"
-	"gorm.io/gorm/logger"
+	"github.com/anaskhan96/go-password-encoder"
 )
 
 
@@ -48,4 +44,14 @@ func main(){
 // 	panic(err)
 // }
 // _ = db.AutoMigrate(&model.User{})
+
+
+	// Using custom options
+	options := &password.Options{10, 10000, 50, sha512.New}
+	salt, encodedPwd := password.Encode("generic password", options)
+	newPassword := fmt.Sprintf("$pbkdf2-sha512$%s$%s", salt, encodedPwd)
+	passwordInfo := strings.Split(newPassword, "$")
+	check := password.Verify("generic password", passwordInfo[2], passwordInfo[3], options)
+
+	fmt.Println(check) // true
 }
