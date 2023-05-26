@@ -1,0 +1,99 @@
+package handler
+
+import (
+	"context"
+	"go-microservice/global"
+	"go-microservice/model"
+	"go-microservice/proto"
+
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
+	"gorm.io/gorm"
+)
+
+
+
+type UserServer struct {}
+
+func Paginate(page, pageSize int) func(db *gorm.DB) *gorm.DB {
+  return func (db *gorm.DB) *gorm.DB {
+    if page <= 0 {
+      page = 1
+    }
+
+    switch {
+    case pageSize > 100:
+      pageSize = 100
+    case pageSize <= 0:
+      pageSize = 10
+    }
+
+    offset := (page - 1) * pageSize
+    return db.Offset(offset).Limit(pageSize)
+  }
+}
+func ModelToResponse(user model.User) proto.UserInfoResponse {
+	userInfoResp := proto.UserInfoResponse{
+		Id: int32(user.ID),
+		Password: user.Password,
+		Nickname: user.NickName,
+		Gender: user.Gender,
+		Role: int32(user.Role),
+
+	}
+	if user.Birthday != nil {
+		// if there is attribute having default value in grpc message
+		// we can't set nil
+		userInfoResp.Birthday = uint64(user.Birthday.Unix())
+	}
+	return userInfoResp
+}
+
+
+func (s *UserServer) GetUserList(ctx context.Context, req *proto.PageInfo)(*proto.UserListResponse, error) {
+	var users []model.User
+	result := global.DB.Find(&users)
+	if result.Error != nil {
+		return nil,result.Error
+	}
+	rsp := &proto.UserListResponse{}
+	rsp.Total = int32(result.RowsAffected)
+
+	global.DB.Scopes(Paginate(int(req.Pn), int(req.PSize))).Find(&users)
+	for _, user := range users {
+		userInfoRsp := ModelToResponse(user)
+		rsp.Data = append(rsp.Data, &userInfoRsp)
+	}
+	return rsp, nil
+}
+
+func (s *UserServer) 	GetUserByMobile(ctx context.Context, req *proto.MobileRequest) (*proto.UserInfoResponse, error){
+  var user model.User
+	result := global.DB.Where((&model.User{Mobile:req.Mobile})).First(&user)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+
+	if result.RowsAffected == 0 {
+		return nil, status.Errorf(codes.NotFound, "User not exist.")
+	}
+
+	userInfoRsp := ModelToResponse(user)
+	return &userInfoRsp, nil
+}
+
+
+func (s *UserServer) 	GetUserById(ctx context.Context, req *proto.IdRequest) (*proto.UserInfoResponse, error){
+  var user model.User
+	result := global.DB.First(&user, req.Id)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+
+	if result.RowsAffected == 0 {
+		return nil, status.Errorf(codes.NotFound, "User not exist.")
+	}
+
+	userInfoRsp := ModelToResponse(user)
+	return &userInfoRsp, nil
+}
