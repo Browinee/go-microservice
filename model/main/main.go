@@ -47,11 +47,20 @@ func main(){
 
 
 	// Using custom options
-	options := &password.Options{10, 10000, 50, sha512.New}
+	options := &password.Options{10, 100, 32, sha512.New}
 	salt, encodedPwd := password.Encode("generic password", options)
 	newPassword := fmt.Sprintf("$pbkdf2-sha512$%s$%s", salt, encodedPwd)
 	passwordInfo := strings.Split(newPassword, "$")
 	check := password.Verify("generic password", passwordInfo[2], passwordInfo[3], options)
 
 	fmt.Println(check) // true
+  // NOTE: gen user
+	// for i :=0; i<10;i++ {
+	// 	user := model.User{
+	// 		NickName: fmt.Sprintf("Test-%d", i),
+	// 		Mobile: fmt.Sprintf("18788822%d", i),
+	// 		Password: newPassword,
+	// 	}
+	// 	global.DB.Save(&user)
+	// }
 }
