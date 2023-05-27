@@ -14,5 +14,4 @@ type User struct {
 	Birthday *time.Time `gorm:"type:datetime"`
 	Gender string `gorm:"column:gender;default:male;type:varchar(6) comment'female means girl, male means boy'"`
 	Role int `gorm:"column:role;default:1;type:int comment '1 means user, 2 means admin'"`
-
 }
