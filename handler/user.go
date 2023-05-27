@@ -19,7 +19,9 @@ import (
 
 
 
-type UserServer struct {}
+type UserServer struct {
+	proto.UnimplementedUserServer
+}
 
 func Paginate(page, pageSize int) func(db *gorm.DB) *gorm.DB {
   return func (db *gorm.DB) *gorm.DB {
