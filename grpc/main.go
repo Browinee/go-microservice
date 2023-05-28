@@ -10,7 +10,7 @@ import (
 func main(){
 	server := grpc.NewServer()
 	proto.RegisterUserServer(server, &handler.UserServer{})
-  lis, err := net.Listen("tcp", "0.0.0.0:5051")
+  lis, err := net.Listen("tcp", "localhost:50051")
 	if err != nil {
 		panic("fail to listen"+err.Error())
 	}
@@ -20,3 +20,4 @@ func main(){
 		panic("fail to start grpc"+err.Error())
 	}
 }
+
