@@ -3,6 +3,7 @@ package api
 import (
 	"context"
 	"fmt"
+	"go-api/global/response"
 	"go-api/proto"
 	"net/http"
 	"time"
@@ -65,11 +66,12 @@ func GetUserList(ctx *gin.Context) {
 	for _, value := range rsp.Data {
 
 		user := response.UserReponse{
-			Id: value.id,
-			Birthday: time.Time(time.Unix(int64(value.Birthday), 0)),
+			Id: value.Id,
+			Birthday: response.JsonTime(time.Unix(int64(value.Birthday), 0)),
+			// Birthda y: time.Time(time.Unix(int64(value.Birthday), 0)),
 			Nickname: value.Nickname,
-			gender: value.Gender,
-			mobile: value.Mobile,
+			Gender: value.Gender,
+			Mobile: value.Mobile,
 		}
 		result = append(result, user)
 	}
