@@ -3,7 +3,7 @@ package main
 
 import (
 	"fmt"
-	"go-microservice/initialize"
+	"go-api/initialize"
 
 	"go.uber.org/zap"
 )

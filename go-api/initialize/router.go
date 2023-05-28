@@ -1,7 +1,7 @@
 package initialize
 
 import (
-	"go-microservice/router"
+	"go-api/router"
 
 	"github.com/gin-gonic/gin"
 )

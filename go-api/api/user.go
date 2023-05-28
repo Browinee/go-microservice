@@ -3,7 +3,7 @@ package api
 import (
 	"context"
 	"fmt"
-	"go-microservice/proto"
+	"go-api/proto"
 	"net/http"
 	"time"
 
