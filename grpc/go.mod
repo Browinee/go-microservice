@@ -1,4 +1,4 @@
-module go-microservice
+module grpc
 
 go 1.20
 
@@ -7,7 +7,7 @@ require (
 	github.com/golang/protobuf v1.5.3
 	google.golang.org/grpc v1.55.0
 	google.golang.org/protobuf v1.30.0
-	gorm.io/driver/mysql v1.5.0
+	gorm.io/driver/mysql v1.5.1
 	gorm.io/gorm v1.25.1
 )
 

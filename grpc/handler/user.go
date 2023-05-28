@@ -4,9 +4,9 @@ import (
 	"context"
 	"crypto/sha512"
 	"fmt"
-	"go-microservice/global"
-	"go-microservice/model"
-	"go-microservice/proto"
+	"grpc/global"
+	"grpc/model"
+	"grpc/proto"
 	"strings"
 	"time"
 

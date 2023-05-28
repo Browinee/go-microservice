@@ -1,7 +1,7 @@
 package global
 
 import (
-	"go-microservice/model"
+	"grpc/model"
 	"log"
 	"os"
 	"time"

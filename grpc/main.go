@@ -1,8 +1,8 @@
 package main
 
 import (
-	"go-microservice/handler"
-	"go-microservice/proto"
+	"grpc/handler"
+	"grpc/proto"
 	"net"
 
 	"google.golang.org/grpc"

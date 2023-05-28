@@ -1,7 +1,7 @@
 package router
 
 import (
-	"go-microservice/api"
+	"go-api/api"
 
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
