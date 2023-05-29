@@ -3,19 +3,19 @@ package main
 
 import (
 	"fmt"
+	"go-api/global"
 	"go-api/initialize"
 
 	"go.uber.org/zap"
 )
 
 func main() {
-	port := 8085
 	initialize.InitLogger()
+  initialize.InitConfig()
 
 	Router := initialize.Routers()
-
-	zap.S().Infof("Start server port %d...", port)
-	if err :=	Router.Run(fmt.Sprintf(":%d", port)); err != nil {
+	zap.S().Infof("Start server port %d...", global.ServerConfig.Port)
+	if err :=	Router.Run(fmt.Sprintf(":%d", global.ServerConfig.Port)); err != nil {
 		zap.S().Panic("Fail to start server", err.Error() )
 	}
 }

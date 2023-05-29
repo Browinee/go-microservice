@@ -3,6 +3,7 @@ package api
 import (
 	"context"
 	"fmt"
+	"go-api/global"
 	"go-api/global/response"
 	"go-api/proto"
 	"net/http"
@@ -45,9 +46,7 @@ func HandleGrpcErrorToHttp(err error, c *gin.Context) {
 	}
 }
 func GetUserList(ctx *gin.Context) {
-	ip := "localhost"
-	port := 50051
-	userConn, err := grpc.Dial(fmt.Sprintf("%s:%d", ip, port), grpc.WithInsecure())
+	userConn, err := grpc.Dial(fmt.Sprintf("%s:%d", global.ServerConfig.UserServiceInfo.Host, global.ServerConfig.UserServiceInfo.Port), grpc.WithInsecure())
 	if err != nil {
 		zap.S().Errorw("[GetUserList] fail", "msg", err.Error())
 	}

@@ -1,0 +1,5 @@
+name: user-web
+port: 8085
+user_srv:
+  host: "127.0.0.1"
+  port: 50051
