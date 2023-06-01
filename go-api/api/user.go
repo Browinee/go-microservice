@@ -7,10 +7,12 @@ import (
 	"go-api/global"
 	"go-api/global/response"
 	"go-api/proto"
+	"go-api/utils"
 	"net/http"
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/go-playground/validator/v10"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
@@ -83,6 +85,16 @@ func GetUserList(ctx *gin.Context) {
 func PassWordLogin(ctx *gin.Context) {
 	passwordLoginForm := forms.PassWordLoginForm{}
 	if err := ctx.ShouldBindJSON(&passwordLoginForm); err != nil {
+		errs, ok := err.(validator.ValidationErrors)
+		if !ok {
+			ctx.JSON(http.StatusOK, gin.H{
+				"msg": err.Error(),
+			})
+		}
+    zap.S().Errorf("valid %v", errs.Translate(global.Trans))
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"error": utils.RemoveTopStruct(errs.Translate(global.Trans)),
+		})
 		return
 	}
 }

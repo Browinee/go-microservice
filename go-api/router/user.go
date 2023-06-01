@@ -12,7 +12,8 @@ func InitUserRouter(router *gin.RouterGroup){
 	userRouter := router.Group("user")
 	zap.S().Info("Register user group.....")
 	{
-		userRouter.GET("/", api.GetUserList)
+		userRouter.GET("/list", api.GetUserList)
+		userRouter.POST("/login", api.PassWordLogin)
 
 	}
 }

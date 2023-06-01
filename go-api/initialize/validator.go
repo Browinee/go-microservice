@@ -2,6 +2,7 @@ package initialize
 
 import (
 	"fmt"
+	"go-api/global"
 	"reflect"
 	"strings"
 
@@ -21,21 +22,22 @@ import (
 
 func InitValidator() {
 	if err := InitTrans("en"); err != nil {
-		zap.S().Errorf("init validator trans failed %v\n", err)
+		zap.S().Errorf("init validator global.Trans failed %v\n", err)
 		return
 	}
+	zap.S().Infof("Initialize Trans...")
 }
 
 
 
-var trans ut.Translator
+
 
 // NOTE: locale can be retrieved from header "Accept-Language"
 func InitTrans(locale string) (err error) {
 	if v, ok := binding.Validator.Engine().(*validator.Validate); ok {
 		// NOTE: use json key instead of entity key
 		v.RegisterTagNameFunc(func(fld reflect.StructField) string {
-			fmt.Printf("INitTrans %v", fld)
+			zap.S().Infof("INitTrans %v", fld)
 			name := strings.SplitN(fld.Tag.Get("json"), ",", 2)[0]
 			if name == "-" {
 				return ""
@@ -50,28 +52,22 @@ func InitTrans(locale string) (err error) {
 		uni := ut.New(enT, zhT, enT)
 
 		var ok bool
-		trans, ok = uni.GetTranslator(locale)
+		global.Trans, ok = uni.GetTranslator(locale)
 		if !ok {
 			return fmt.Errorf("uni.GetTranslator(%s) failed", locale)
 		}
 
 		switch locale {
 		case "en":
-			err = enTranslations.RegisterDefaultTranslations(v, trans)
+			err = enTranslations.RegisterDefaultTranslations(v, global.Trans)
 		case "zh":
-			err = zhTranslations.RegisterDefaultTranslations(v, trans)
+			err = zhTranslations.RegisterDefaultTranslations(v, global.Trans)
 		default:
-			err = enTranslations.RegisterDefaultTranslations(v, trans)
+			err = enTranslations.RegisterDefaultTranslations(v, global.Trans)
 		}
 		return
 	}
+
 	return
 }
 
-func removeTopStruct(fields map[string]string) map[string]string {
-	res := map[string]string{}
-	for field, err := range fields {
-		res[field[strings.Index(field, ".")+1:]] = err
-	}
-	return res
-}
