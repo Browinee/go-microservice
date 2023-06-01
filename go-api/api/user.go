@@ -51,9 +51,10 @@ func GetUserList(ctx *gin.Context) {
 		zap.S().Errorw("[GetUserList] fail", "msg", err.Error())
 	}
 	userSrcClient := proto.NewUserClient(userConn)
+	offset, limit := getPageInfo(ctx)
 	rsp, err := userSrcClient.GetUserList(context.Background(), &proto.PageInfo{
-		Pn: 0,
-		PSize:0,
+		Pn: uint32(offset),
+		PSize:uint32(limit),
 	})
 
 	if err != nil {
