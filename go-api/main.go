@@ -12,6 +12,7 @@ import (
 func main() {
 	initialize.InitLogger()
   initialize.InitConfig()
+  initialize.InitValidator()
 
 	Router := initialize.Routers()
 	zap.S().Infof("Start server port %d...", global.ServerConfig.Port)

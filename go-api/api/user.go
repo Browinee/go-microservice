@@ -3,6 +3,7 @@ package api
 import (
 	"context"
 	"fmt"
+	"go-api/forms"
 	"go-api/global"
 	"go-api/global/response"
 	"go-api/proto"
@@ -76,4 +77,12 @@ func GetUserList(ctx *gin.Context) {
 		result = append(result, user)
 	}
 	ctx.JSON(http.StatusOK, result)
+}
+
+
+func PassWordLogin(ctx *gin.Context) {
+	passwordLoginForm := forms.PassWordLoginForm{}
+	if err := ctx.ShouldBindJSON(&passwordLoginForm); err != nil {
+		return
+	}
 }
