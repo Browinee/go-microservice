@@ -97,4 +97,12 @@ func PassWordLogin(ctx *gin.Context) {
 		})
 		return
 	}
+
+
+
+
+
+
+
+
 }
