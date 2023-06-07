@@ -2,7 +2,6 @@ package api
 
 import (
 	"context"
-	"crypto/sha512"
 	"fmt"
 	"go-api/forms"
 	"go-api/global"
@@ -13,7 +12,6 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/anaskhan96/go-password-encoder"
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
 	"go.uber.org/zap"
@@ -117,16 +115,8 @@ func PassWordLogin(ctx *gin.Context) {
 		return
 	}
 
-	// REFACTROR
-	options := &password.Options{16, 100, 32, sha512.New}
-	salt, encodedPwd := password.Encode(passwordLoginForm.Password, options)
-	newPassword := fmt.Sprintf("$pbkdf2-sha512$%s$%s", salt, encodedPwd)
-	zap.S().Infof("newPassword", newPassword)
-	zap.S().Infof("rsp.Password", rsp.Password)
-
-
   if passRsp,pasErr := userSrcClient.CheckPassword(context.Background(), &proto.PasswordCheckInfo{
-		Password:newPassword,
+		Password:passwordLoginForm.Password,
 		EncryptedPassword: rsp.Password,
 	}); pasErr != nil {
 		ctx.JSON(http.StatusInternalServerError, map[string]string{
