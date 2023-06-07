@@ -2,15 +2,18 @@ package api
 
 import (
 	"context"
+	"crypto/sha512"
 	"fmt"
 	"go-api/forms"
 	"go-api/global"
 	"go-api/global/response"
+	"go-api/pkg/jwt"
 	"go-api/proto"
 	"go-api/utils"
 	"net/http"
 	"time"
 
+	"github.com/anaskhan96/go-password-encoder"
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
 	"go.uber.org/zap"
@@ -25,7 +28,7 @@ func HandleGrpcErrorToHttp(err error, c *gin.Context) {
 		if e, ok :=	status.FromError(err); ok {
 			 switch e.Code() {
 			 	case codes.NotFound:
-					c.JSON(http.StatusNotFound, gin.H{
+					 c.JSON(http.StatusNotFound, gin.H{
 						"msg": e.Message(),
 					})
 				case codes.Internal:
@@ -98,11 +101,55 @@ func PassWordLogin(ctx *gin.Context) {
 		return
 	}
 
+	userConn, err := grpc.Dial(fmt.Sprintf("%s:%d", global.ServerConfig.UserServiceInfo.Host, global.ServerConfig.UserServiceInfo.Port), grpc.WithInsecure())
+	if err != nil {
+		zap.S().Errorw("[PasswordLogin] fail", "msg", err.Error())
+	}
+	userSrcClient := proto.NewUserClient(userConn)
+
+	rsp, err := userSrcClient.GetUserByMobile(context.Background(), &proto.MobileRequest{
+		Mobile: passwordLoginForm.Mobile,
+	})
+
+	if err != nil {
+		zap.S().Errorw("[PassWordLogin] user not found")
+		HandleGrpcErrorToHttp(err, ctx)
+		return
+	}
+
+	// REFACTROR
+	options := &password.Options{16, 100, 32, sha512.New}
+	salt, encodedPwd := password.Encode(passwordLoginForm.Password, options)
+	newPassword := fmt.Sprintf("$pbkdf2-sha512$%s$%s", salt, encodedPwd)
+	zap.S().Infof("newPassword", newPassword)
+	zap.S().Infof("rsp.Password", rsp.Password)
 
 
-
-
-
-
+  if passRsp,pasErr := userSrcClient.CheckPassword(context.Background(), &proto.PasswordCheckInfo{
+		Password:newPassword,
+		EncryptedPassword: rsp.Password,
+	}); pasErr != nil {
+		ctx.JSON(http.StatusInternalServerError, map[string]string{
+			"msg": "登錄失敗",
+		})
+	} else {
+		 if passRsp.Success {
+				accessToken, err := jwt.GenToken(rsp.Id, rsp.Nickname, rsp.Role)
+				if err != nil {
+					ctx.JSON(http.StatusInternalServerError, gin.H{"msg":"fail to create token"})
+					return
+				}
+				ctx.JSON(http.StatusOK, gin.H{
+					"id": rsp.Id,
+					"token": accessToken,
+				})
+				return
+		 } else {
+			 ctx.JSON(http.StatusBadRequest,gin.H{
+				 "msg":"Fail to login.",
+			 })
+			 return
+		 }
+	}
 
 }

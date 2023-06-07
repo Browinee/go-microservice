@@ -3,3 +3,6 @@ port: 8085
 user_srv:
   host: "127.0.0.1"
   port: 50051
+jwt:
+  jwt_key: asda1231@!@wf
+  jwt_expire: 8760
