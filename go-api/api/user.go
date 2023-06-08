@@ -99,6 +99,15 @@ func PassWordLogin(ctx *gin.Context) {
 		return
 	}
 
+
+	if !store.Verify(passwordLoginForm.CaptchaId, passwordLoginForm.Captcha, true) {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"captcha":"captcha error",
+		})
+		return
+	}
+
+
 	userConn, err := grpc.Dial(fmt.Sprintf("%s:%d", global.ServerConfig.UserServiceInfo.Host, global.ServerConfig.UserServiceInfo.Port), grpc.WithInsecure())
 	if err != nil {
 		zap.S().Errorw("[PasswordLogin] fail", "msg", err.Error())
