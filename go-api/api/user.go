@@ -14,6 +14,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
+	"github.com/go-redis/redis"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
@@ -170,29 +171,38 @@ func Register(ctx *gin.Context) {
 		})
 		return
 	}
-
+zap.S().Info("before get validation code----")
 	// validate code
-	// if err == nil {
-	// 	ctx.JSON(http.StatusBadRequest, gin.H{
-	// 		"code":"validation code error",
-	// 	})
-	// 	return
-	// }
-	// userConn, err := grpc.Dial(fmt.Sprintf("%s:%d", global.ServerConfig.UserServiceInfo.Host, global.ServerConfig.UserServiceInfo.Port), grpc.WithInsecure())
-	// if err != nil {
-	// 	zap.S().Errorw("[GetUserList] fail", "msg", err.Error())
-	// }
-	// userSrcClient := proto.NewUserClient(userConn)
-	// // user, err := userSrcClient.CreateUser(context.Background(), &proto.CreateUserInfo{
-	// 	Nickname: registerForm.Mobile,
-	// 	Password: registerForm.Password,
-	// 	Mobile: registerForm.Mobile,
-	// })
-	// if err != nil {
-	// 	zap.S().Errorf("[User] fail creat user:  %s", err.Error())
-	// 	HandleGrpcErrorToHttp(err, ctx)
-	// 	return
-	// }
-	// c.JSON()
+	value, err := global.RedisClient.Get(registerForm.Mobile).Result()
+	if err == redis.Nil {
+		zap.S().Error("mobile key not existed")
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"msg":"Wrong mobile",
+		})
+		return
+	}
+
+	if value != registerForm.Code {
+		zap.S().Error("wrong code")
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"msg":"Wrong code",
+		})
+	}
+	userConn, err := grpc.Dial(fmt.Sprintf("%s:%d", global.ServerConfig.UserServiceInfo.Host, global.ServerConfig.UserServiceInfo.Port), grpc.WithInsecure())
+
+	userSrcClient := proto.NewUserClient(userConn)
+	user, userErr := userSrcClient.CreateUser(context.Background(), &proto.CreateUserInfo{
+		Nickname: registerForm.Mobile,
+		Password: registerForm.Password,
+		Mobile: registerForm.Mobile,
+	})
+	zap.S().Infof("user created %v", user)
+	if userErr != nil {
+		zap.S().Errorf("[Register] fail creat user:  %s", err.Error())
+		HandleGrpcErrorToHttp(err, ctx)
+		return
+	}
+	ctx.JSON(http.StatusOK, gin.H{})
+	return
 
 }

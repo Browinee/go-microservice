@@ -14,7 +14,7 @@ func InitBaseRouter(router *gin.RouterGroup) {
 	zap.S().Info("Register user group.....")
 	{
 		userRouter.POST("/login",  api.PassWordLogin)
-		userRouter.GET("/register", api.Register)
+		userRouter.POST("/register", api.Register)
 		userRouter.GET("/list", middlewares.JWTAuthMiddleware(),middlewares.IsAdminAuth(), api.GetUserList)
 
 	}

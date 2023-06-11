@@ -46,7 +46,7 @@ func SendSms(ctx *gin.Context){
 	// sms發送後，要從response中取的code並加入redis中
   smsCode := GenerateSmsCode(6)
 	zap.S().Infof("smsCode: %s", smsCode)
-	mobile:="12312312312"
+	mobile:=sendSmsForm.Mobile
 	global.RedisClient.Set(mobile, smsCode, 300 * time.Second)
 	ctx.JSON(http.StatusOK, gin.H{
 		"msg":"Send sms code successfully",
