@@ -152,3 +152,47 @@ func PassWordLogin(ctx *gin.Context) {
 	}
 
 }
+
+
+
+func Register(ctx *gin.Context) {
+	registerForm := forms.RegisterForm{}
+	if err := ctx.ShouldBindJSON(&registerForm); err != nil {
+		errs, ok := err.(validator.ValidationErrors)
+		if !ok {
+			ctx.JSON(http.StatusOK, gin.H{
+				"msg": err.Error(),
+			})
+		}
+    zap.S().Errorf("valid %v", errs.Translate(global.Trans))
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"error": utils.RemoveTopStruct(errs.Translate(global.Trans)),
+		})
+		return
+	}
+
+	// validate code
+	// if err == nil {
+	// 	ctx.JSON(http.StatusBadRequest, gin.H{
+	// 		"code":"validation code error",
+	// 	})
+	// 	return
+	// }
+	// userConn, err := grpc.Dial(fmt.Sprintf("%s:%d", global.ServerConfig.UserServiceInfo.Host, global.ServerConfig.UserServiceInfo.Port), grpc.WithInsecure())
+	// if err != nil {
+	// 	zap.S().Errorw("[GetUserList] fail", "msg", err.Error())
+	// }
+	// userSrcClient := proto.NewUserClient(userConn)
+	// // user, err := userSrcClient.CreateUser(context.Background(), &proto.CreateUserInfo{
+	// 	Nickname: registerForm.Mobile,
+	// 	Password: registerForm.Password,
+	// 	Mobile: registerForm.Mobile,
+	// })
+	// if err != nil {
+	// 	zap.S().Errorf("[User] fail creat user:  %s", err.Error())
+	// 	HandleGrpcErrorToHttp(err, ctx)
+	// 	return
+	// }
+	// c.JSON()
+
+}

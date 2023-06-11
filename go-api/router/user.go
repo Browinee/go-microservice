@@ -2,17 +2,20 @@ package router
 
 import (
 	"go-api/api"
+	"go-api/middlewares"
 
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
 )
 
 
-func InitUserRouter(router *gin.RouterGroup){
-	baseRouter := router.Group("base")
-	zap.S().Info("Register base group.....")
+func InitBaseRouter(router *gin.RouterGroup) {
+	userRouter := router.Group("user")
+	zap.S().Info("Register user group.....")
 	{
-		baseRouter.GET("/captcha", api.GetCaptcha)
+		userRouter.POST("/login",  api.PassWordLogin)
+		userRouter.GET("/register", api.Register)
+		userRouter.GET("/list", middlewares.JWTAuthMiddleware(),middlewares.IsAdminAuth(), api.GetUserList)
 
 	}
 }

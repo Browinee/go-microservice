@@ -6,3 +6,9 @@ user_srv:
 jwt:
   jwt_key: asda1231@!@wf
   jwt_expire: 8760
+redis:
+  host: "127.0.0.1"
+  port: 6379
+  db: 0
+  password: ""
+  pool_size: 100

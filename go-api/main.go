@@ -16,7 +16,11 @@ func main() {
 	initialize.InitLogger()
   initialize.InitConfig()
   initialize.InitValidator()
-
+  redisErr := initialize.InitRedis()
+	if redisErr!= nil {
+		zap.S().Errorf("init redis failed, err %v\n", redisErr)
+	}
+	defer initialize.CloseRedis()
 	Router := initialize.Routers()
 
   if v , ok := binding.Validator.Engine().(*validator.Validate); ok {

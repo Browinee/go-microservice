@@ -25,7 +25,7 @@ func InitValidator() {
 		zap.S().Errorf("init validator global.Trans failed %v\n", err)
 		return
 	}
-	zap.S().Infof("Initialize Trans...")
+	zap.S().Infof("Init Trans successfully")
 }
 
 
