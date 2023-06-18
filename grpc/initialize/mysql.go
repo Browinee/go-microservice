@@ -8,6 +8,7 @@ import (
 	"os"
 	"time"
 
+	"go.uber.org/zap"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
@@ -15,7 +16,9 @@ import (
 
 func InitMysql() {
 	mysqlInfo := global.ServerConfig.Mysql
-	dsn := fmt.Sprintf("%s:%s@tcp(%s:%d)/mxshop_user_srv?charset=utf8mb4&parseTime=True&loc=Local", mysqlInfo.User, mysqlInfo.Password, mysqlInfo.Host, mysqlInfo.Port, mysqlInfo.Name)
+	zap.S().Infof("mysql %#v", mysqlInfo)
+	dsn := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=utf8mb4&parseTime=True&loc=Local", mysqlInfo.User, mysqlInfo.Password, mysqlInfo.Host, mysqlInfo.Port, mysqlInfo.Name)
+
 	newLogger := logger.New(
 		log.New(os.Stdout, "\r\n", log.LstdFlags),
 		logger.Config{
@@ -31,5 +34,5 @@ func InitMysql() {
 if err != nil {
 	panic(err)
 }
-_ = DB.AutoMigrate(&model.User{})
+_ = global.DB.AutoMigrate(&model.User{})
 }

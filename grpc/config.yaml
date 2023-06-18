@@ -1,8 +1,8 @@
-name: user-web
-port: 8085
+# name: user-web
+# port: 8085
 mysql:
-  host: "127.0.0.1"
-  port: 6379
-  db: 0
-  password: ""
-  pool_size: 100
+  host: localhost
+  port: 3306
+  db: mxshop_user_srv
+  user: root
+  password: "root1234"
