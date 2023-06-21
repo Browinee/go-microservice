@@ -15,6 +15,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
 	"github.com/go-redis/redis"
+	"github.com/hashicorp/consul/api"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
@@ -51,7 +52,31 @@ func HandleGrpcErrorToHttp(err error, c *gin.Context) {
 	}
 }
 func GetUserList(ctx *gin.Context) {
-	userConn, err := grpc.Dial(fmt.Sprintf("%s:%d", global.ServerConfig.UserServiceInfo.Host, global.ServerConfig.UserServiceInfo.Port), grpc.WithInsecure())
+	// get grpc service from consul
+	cfg := api.DefaultConfig()
+	consulInfo := global.ServerConfig.Consul
+	cfg.Address = fmt.Sprintf("%s:%d", consulInfo.Host, consulInfo.Port)
+
+	client, err := api.NewClient(cfg)
+
+	if err != nil {
+		panic(err)
+	}
+
+	data, err := client.Agent().ServicesWithFilter(fmt.Sprintf(`Service == "%s"`, global.ServerConfig.UserServiceInfo.Name))
+	if err != nil {
+		panic(err)
+	}
+	userSrvHost := ""
+	userSrvPort := 0
+	 for _, value := range data{
+		userSrvHost = value.Address
+		userSrvPort = value.Port
+		break
+	 }
+
+
+	userConn, err := grpc.Dial(fmt.Sprintf("%s:%d", userSrvHost, userSrvPort), grpc.WithInsecure())
 	if err != nil {
 		zap.S().Errorw("[GetUserList] fail", "msg", err.Error())
 	}
@@ -101,12 +126,12 @@ func PassWordLogin(ctx *gin.Context) {
 	}
 
 
-	if !store.Verify(passwordLoginForm.CaptchaId, passwordLoginForm.Captcha, true) {
-		ctx.JSON(http.StatusBadRequest, gin.H{
-			"captcha":"captcha error",
-		})
-		return
-	}
+	// if !store.Verify(passwordLoginForm.CaptchaId, passwordLoginForm.Captcha, true) {
+	// 	ctx.JSON(http.StatusBadRequest, gin.H{
+	// 		"captcha":"captcha error",
+	// 	})
+	// 	return
+	// }
 
 
 	userConn, err := grpc.Dial(fmt.Sprintf("%s:%d", global.ServerConfig.UserServiceInfo.Host, global.ServerConfig.UserServiceInfo.Port), grpc.WithInsecure())
@@ -206,3 +231,5 @@ zap.S().Info("before get validation code----")
 	return
 
 }
+
+
