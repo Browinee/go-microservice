@@ -1,8 +1,11 @@
-# name: user-web
-# port: 8085
+name: user-service
 mysql:
   host: localhost
   port: 3306
   db: mxshop_user_srv
   user: root
   password: "root1234"
+
+consul:
+  host: 127.0.0.1
+  port: 8500
