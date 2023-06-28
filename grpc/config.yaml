@@ -7,5 +7,5 @@ mysql:
   password: "root1234"
 
 consul:
-  host: 127.0.0.1
+  host: localhost
   port: 8500

@@ -24,7 +24,7 @@ func main(){
 	initialize.InitMysql()
 	server := grpc.NewServer()
 	proto.RegisterUserServer(server, &handler.UserServer{})
-  lis, err := net.Listen("tcp", "192.168.1.103:50051")
+  lis, err := net.Listen("tcp", "192.168.0.2:50051")
 	if err != nil {
 		panic("fail to listen"+err.Error())
 	}
@@ -39,7 +39,7 @@ func main(){
 		panic(err)
 	}
 	check := &api.AgentServiceCheck{
-		GRPC: "192.168.1.103:50051",
+		GRPC: "192.168.0.2:50051",
 		Timeout: "5s",
 		Interval: "5s",
 		DeregisterCriticalServiceAfter: "600s",
@@ -49,7 +49,7 @@ func main(){
 	registration.ID = global.ServerConfig.Name
 	registration.Port = 50051
 	registration.Tags = []string{"user", "service"}
-	registration.Address = "192.168.1.103"
+	registration.Address = "192.168.0.2"
 	registration.Check = check
 
 	err = client.Agent().ServiceRegister(registration)
