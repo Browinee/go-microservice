@@ -16,12 +16,13 @@ func main() {
 	initialize.InitLogger()
   initialize.InitConfig()
   initialize.InitValidator()
+	initialize.InitSrcConn()
   redisErr := initialize.InitRedis()
 	if redisErr!= nil {
 		zap.S().Errorf("init redis failed, err %v\n", redisErr)
 	}
-	defer initialize.CloseRedis()
 	Router := initialize.Routers()
+	defer initialize.CloseRedis()
 
   if v , ok := binding.Validator.Engine().(*validator.Validate); ok {
 		v.RegisterValidation("mobile", myValidator.ValidateMobile)

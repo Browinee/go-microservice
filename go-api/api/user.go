@@ -2,7 +2,6 @@ package api
 
 import (
 	"context"
-	"fmt"
 	"go-api/forms"
 	"go-api/global"
 	"go-api/global/response"
@@ -15,9 +14,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
 	"github.com/go-redis/redis"
-	"github.com/hashicorp/consul/api"
 	"go.uber.org/zap"
-	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
@@ -52,37 +49,8 @@ func HandleGrpcErrorToHttp(err error, c *gin.Context) {
 	}
 }
 func GetUserList(ctx *gin.Context) {
-	// get grpc service from consul
-	cfg := api.DefaultConfig()
-	consulInfo := global.ServerConfig.Consul
-	cfg.Address = fmt.Sprintf("%s:%d", consulInfo.Host, consulInfo.Port)
-
-	client, err := api.NewClient(cfg)
-
-	if err != nil {
-		panic(err)
-	}
-
-	data, err := client.Agent().ServicesWithFilter(fmt.Sprintf(`Service == "%s"`, global.ServerConfig.UserServiceInfo.Name))
-	if err != nil {
-		panic(err)
-	}
-	userSrvHost := ""
-	userSrvPort := 0
-	 for _, value := range data{
-		userSrvHost = value.Address
-		userSrvPort = value.Port
-		break
-	 }
-
-
-	userConn, err := grpc.Dial(fmt.Sprintf("%s:%d", userSrvHost, userSrvPort), grpc.WithInsecure())
-	if err != nil {
-		zap.S().Errorw("[GetUserList] fail", "msg", err.Error())
-	}
-	userSrcClient := proto.NewUserClient(userConn)
 	offset, limit := getPageInfo(ctx)
-	rsp, err := userSrcClient.GetUserList(context.Background(), &proto.PageInfo{
+	rsp, err := global.UserSrvClient.GetUserList(context.Background(), &proto.PageInfo{
 		Pn: uint32(offset),
 		PSize:uint32(limit),
 	})
@@ -134,13 +102,8 @@ func PassWordLogin(ctx *gin.Context) {
 	// }
 
 
-	userConn, err := grpc.Dial(fmt.Sprintf("%s:%d", global.ServerConfig.UserServiceInfo.Host, global.ServerConfig.UserServiceInfo.Port), grpc.WithInsecure())
-	if err != nil {
-		zap.S().Errorw("[PasswordLogin] fail", "msg", err.Error())
-	}
-	userSrcClient := proto.NewUserClient(userConn)
 
-	rsp, err := userSrcClient.GetUserByMobile(context.Background(), &proto.MobileRequest{
+	rsp, err := global.UserSrvClient.GetUserByMobile(context.Background(), &proto.MobileRequest{
 		Mobile: passwordLoginForm.Mobile,
 	})
 
@@ -150,7 +113,7 @@ func PassWordLogin(ctx *gin.Context) {
 		return
 	}
 
-  if passRsp,pasErr := userSrcClient.CheckPassword(context.Background(), &proto.PasswordCheckInfo{
+  if passRsp,pasErr := global.UserSrvClient.CheckPassword(context.Background(), &proto.PasswordCheckInfo{
 		Password:passwordLoginForm.Password,
 		EncryptedPassword: rsp.Password,
 	}); pasErr != nil {
@@ -196,7 +159,6 @@ func Register(ctx *gin.Context) {
 		})
 		return
 	}
-zap.S().Info("before get validation code----")
 	// validate code
 	value, err := global.RedisClient.Get(registerForm.Mobile).Result()
 	if err == redis.Nil {
@@ -213,10 +175,7 @@ zap.S().Info("before get validation code----")
 			"msg":"Wrong code",
 		})
 	}
-	userConn, err := grpc.Dial(fmt.Sprintf("%s:%d", global.ServerConfig.UserServiceInfo.Host, global.ServerConfig.UserServiceInfo.Port), grpc.WithInsecure())
-
-	userSrcClient := proto.NewUserClient(userConn)
-	user, userErr := userSrcClient.CreateUser(context.Background(), &proto.CreateUserInfo{
+	user, userErr := global.UserSrvClient.CreateUser(context.Background(), &proto.CreateUserInfo{
 		Nickname: registerForm.Mobile,
 		Password: registerForm.Password,
 		Mobile: registerForm.Mobile,

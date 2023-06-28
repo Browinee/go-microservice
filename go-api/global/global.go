@@ -2,6 +2,7 @@ package global
 
 import (
 	"go-api/config"
+	"go-api/proto"
 
 	ut "github.com/go-playground/universal-translator"
 	"github.com/go-redis/redis"
@@ -12,4 +13,5 @@ var (
 	 RedisClient *redis.Client
 	ServerConfig *config.ServerConfig = &config.ServerConfig{}
 	Trans ut.Translator
+	UserSrvClient proto.UserClient
 )
