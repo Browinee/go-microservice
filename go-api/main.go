@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"go-api/global"
 	"go-api/initialize"
+	"go-api/utils"
 	myValidator "go-api/validators"
 
 	"github.com/gin-gonic/gin/binding"
@@ -21,9 +22,15 @@ func main() {
 	if redisErr!= nil {
 		zap.S().Errorf("init redis failed, err %v\n", redisErr)
 	}
-	Router := initialize.Routers()
 	defer initialize.CloseRedis()
 
+
+	Router := initialize.Routers()
+  // NOTE: 非local的話，自動獲取
+	// port, err := utils.GetFreePort()
+	// if err ==nil {
+	// 	global.ServerConfig.Port = port
+	// }
   if v , ok := binding.Validator.Engine().(*validator.Validate); ok {
 		v.RegisterValidation("mobile", myValidator.ValidateMobile)
 	}
