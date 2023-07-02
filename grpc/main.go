@@ -1,14 +1,18 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"grpc/global"
 	"grpc/handler"
 	"grpc/initialize"
 	"grpc/proto"
+	"grpc/utils"
 	"net"
 
+	"github.com/google/uuid"
 	"github.com/hashicorp/consul/api"
+	"go.uber.org/zap"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/health"
 	"google.golang.org/grpc/health/grpc_health_v1"
@@ -18,13 +22,23 @@ import (
 
 
 func main(){
+  IP := flag.String("ip", "0.0.0.0","ip address")
+	Port := flag.Int("port", 0, "port")
+	flag.Parse()
+	if *Port == 0 {
+		*Port , _ = utils.GetFreePort()
+	}
 
 	initialize.InitLogger()
 	initialize.InitConfig()
 	initialize.InitMysql()
 	server := grpc.NewServer()
 	proto.RegisterUserServer(server, &handler.UserServer{})
-  lis, err := net.Listen("tcp", "192.168.0.2:50051")
+
+	zap.S().Infof("Port", *Port)
+	zap.S().Infof("IP", *IP)
+	lis, err := net.Listen("tcp", fmt.Sprintf("%s:%d", *IP, *Port))
+  // lis, err := net.Listen("tcp", "192.168.0.2:50051")
 	if err != nil {
 		panic("fail to listen"+err.Error())
 	}
@@ -39,15 +53,19 @@ func main(){
 		panic(err)
 	}
 	check := &api.AgentServiceCheck{
-		GRPC: "192.168.0.2:50051",
+		GRPC:  fmt.Sprintf("192.168.0.2:%d", *Port),
+		// GRPC: "192.168.0.2:50051",
 		Timeout: "5s",
 		Interval: "5s",
 		DeregisterCriticalServiceAfter: "600s",
 	}
 	registration := new(api.AgentServiceRegistration)
 	registration.Name = global.ServerConfig.Name
-	registration.ID = global.ServerConfig.Name
-	registration.Port = 50051
+	uuid := uuid.New()
+
+	// NOTE if id the same, it will override service in consul
+	registration.ID = uuid.String()
+	registration.Port = *Port /* 50051 */
 	registration.Tags = []string{"user", "service"}
 	registration.Address = "192.168.0.2"
 	registration.Check = check
