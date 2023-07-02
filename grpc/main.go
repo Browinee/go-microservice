@@ -9,6 +9,9 @@ import (
 	"grpc/proto"
 	"grpc/utils"
 	"net"
+	"os"
+	"os/signal"
+	"syscall"
 
 	"github.com/google/uuid"
 	"github.com/hashicorp/consul/api"
@@ -64,7 +67,8 @@ func main(){
 	uuid := uuid.New()
 
 	// NOTE if id the same, it will override service in consul
-	registration.ID = uuid.String()
+	serviceId := uuid.Strint()
+	registration.ID = serviceId
 	registration.Port = *Port /* 50051 */
 	registration.Tags = []string{"user", "service"}
 	registration.Address = "192.168.0.2"
@@ -74,9 +78,21 @@ func main(){
 	if err != nil {
 		panic("fail to register grpc"+err.Error())
 	}
-	err  = server.Serve(lis)
-	if err != nil {
-		panic("fail to start grpc"+err.Error())
-	}
+
+
+	go func() {
+		err  = server.Serve(lis)
+		if err != nil {
+			panic("fail to start grpc"+err.Error())
+		}
+	}()
+	// graceful quit
+	quit := make(chan os.Signal)
+	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
+	<-quit
+	if err = client.Agent() .ServiceDeregister(serviceId);err != nil {
+	zap.S().Info("Fail to deregister service")
+}
+zap.S().Infof("Deregister service: %s", serviceId)
 }
 
