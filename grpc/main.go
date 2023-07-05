@@ -56,7 +56,7 @@ func main(){
 		panic(err)
 	}
 	check := &api.AgentServiceCheck{
-		GRPC:  fmt.Sprintf("192.168.0.2:%d", *Port),
+		GRPC:  fmt.Sprintf("192.168.1.103:%d", *Port),
 		// GRPC: "192.168.0.2:50051",
 		Timeout: "5s",
 		Interval: "5s",
@@ -67,11 +67,11 @@ func main(){
 	uuid := uuid.New()
 
 	// NOTE if id the same, it will override service in consul
-	serviceId := uuid.Strint()
+	serviceId := uuid.String()
 	registration.ID = serviceId
 	registration.Port = *Port /* 50051 */
 	registration.Tags = []string{"user", "service"}
-	registration.Address = "192.168.0.2"
+	registration.Address = "192.168.1.103"
 	registration.Check = check
 
 	err = client.Agent().ServiceRegister(registration)
