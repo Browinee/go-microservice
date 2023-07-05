@@ -6,12 +6,28 @@ import (
 	"go-api/proto"
 
 	"github.com/hashicorp/consul/api"
+	"github.com/mbobakov/grpc-consul-resolver"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 )
 
-
 func InitSrcConn() {
+	consulInfo := global.ServerConfig.Consul
+	userConn, err := grpc.Dial(
+		fmt.Sprintf("consul://%s:%d/%s?wait=14s", consulInfo.Host, consulInfo.Port, global.ServerConfig.UserServiceInfo.Name),
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
+		grpc.WithDefaultServiceConfig(`{"loadBalancingPolicy": "round_robin"}`),
+	)
+	if err != nil {
+		zap.S().Fatal("[InitSrvConn] Fail to connect UserSrvClient")
+	}
+	userSrcClient := proto.NewUserClient(userConn)
+	global.UserSrvClient = userSrcClient
+
+
+}
+func InitSrcConn_Deprecated() {
 		// get grpc service from consul
 		cfg := api.DefaultConfig()
 		consulInfo := global.ServerConfig.Consul
