@@ -6,7 +6,7 @@ import (
 	"go-api/proto"
 
 	"github.com/hashicorp/consul/api"
-	"github.com/mbobakov/grpc-consul-resolver"
+	_ "github.com/mbobakov/grpc-consul-resolver"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"

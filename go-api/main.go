@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"go-api/global"
 	"go-api/initialize"
-	"go-api/utils"
 	myValidator "go-api/validators"
 
 	"github.com/gin-gonic/gin/binding"

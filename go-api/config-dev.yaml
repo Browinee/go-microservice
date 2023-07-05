@@ -1,7 +1,7 @@
 name: user-web
 port: 8085
 user_srv:
-  host: "192.168.0.2"
+  host: "192.168.1.103"
   port: 50051
   name: user-service
 jwt:
@@ -14,5 +14,5 @@ redis:
   password: ""
   pool_size: 100
 consul:
-  host: 192.168.0.2
+  host: 192.168.1.103
   port: 8500
