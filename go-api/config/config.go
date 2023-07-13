@@ -2,9 +2,9 @@ package config
 
 
 type UserServiceConfig struct {
-	Host string `mapstructure:"host"`
-	Port int `mapstructure:"port"`
-	Name string `mapstructure:"name"`
+	Host string `mapstructure:"host" json:"host"`
+	Port int `mapstructure:"port" json:"port"`
+	Name string `mapstructure:"name" json:"name"`
 
 }
 type RedisConfig struct {
@@ -22,7 +22,18 @@ type ConsulConfig struct {
 type ServerConfig struct {
 	Name string  `mapstructure:"name"`
 	Port int `mapstructure:"port"`
-	UserServiceInfo UserServiceConfig `mapstructure:"user_srv"`
+	UserConfig UserServiceConfig `mapstructure:"user_service"`
 	Redis RedisConfig `mapstructure:"redis"`
 	Consul ConsulConfig `mapstructure:"consul" json:"consul"`
+
+}
+
+type NacosConfig struct {
+	Host string `mapstructure:"host" json:"host"`
+	Port uint64 `mapstructure:"port" json:"port"`
+	Namespace string `mapstructure:"namespace" json:"namespace"`
+	User string`mapstructure:"user" json:"user"`
+	Password string`mapstructure:"password" json:"password"`
+	DataId string `mapstructure:"dataId" json:"dataId"`
+	Group string `mapstructure:"group" json:"group"`
 }

@@ -1,18 +1,7 @@
-name: user-web
-port: 8085
-user_srv:
-  host: "192.168.1.103"
-  port: 50051
-  name: user-service
-jwt:
-  jwt_key: asda1231@!@wf
-  jwt_expire: 8760
-redis:
-  host: "127.0.0.1"
-  port: 6379
-  db: 0
-  password: ""
-  pool_size: 100
-consul:
-  host: 192.168.1.103
-  port: 8500
+host: "127.0.0.1"
+port: 8848
+namespace: "public"
+user: "nacos"
+password: "nacos"
+dataId: "user-web.json"
+group: "DEFAULT_GROUP"

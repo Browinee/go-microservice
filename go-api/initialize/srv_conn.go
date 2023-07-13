@@ -14,13 +14,16 @@ import (
 
 func InitSrcConn() {
 	consulInfo := global.ServerConfig.Consul
+	a := fmt.Sprintf("consul://%s:%d/%s?wait=14s", consulInfo.Host, consulInfo.Port, global.ServerConfig.UserConfig.Name)
+	zap.S().Info("-------aaaaa: %+v ", a)
 	userConn, err := grpc.Dial(
-		fmt.Sprintf("consul://%s:%d/%s?wait=14s", consulInfo.Host, consulInfo.Port, global.ServerConfig.UserServiceInfo.Name),
+		a,
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 		grpc.WithDefaultServiceConfig(`{"loadBalancingPolicy": "round_robin"}`),
 	)
+ zap.S().Infof("consulInfo-------%+v", consulInfo)
 	if err != nil {
-		zap.S().Fatal("[InitSrvConn] Fail to connect UserSrvClient")
+		zap.S().Fatalf("[InitSrvConn] Fail to connect UserSrvClient %+v:", err.Error())
 	}
 	userSrcClient := proto.NewUserClient(userConn)
 	global.UserSrvClient = userSrcClient
@@ -39,7 +42,7 @@ func InitSrcConn_Deprecated() {
 			panic(err)
 		}
 
-	data, err := client.Agent().ServicesWithFilter(fmt.Sprintf(`Service == "%s"`, global.ServerConfig.UserServiceInfo.Name))
+	data, err := client.Agent().ServicesWithFilter(fmt.Sprintf(`Service == "%s"`, global.ServerConfig.UserConfig.Name))
 	if err != nil {
 		panic(err)
 	}
