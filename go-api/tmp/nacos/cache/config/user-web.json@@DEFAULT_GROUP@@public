@@ -1,7 +1,7 @@
 {
   "name": "user-web",
   "port": 8085,
-  "user_service": {
+  "user_srv": {
     "host": "192.168.1.103",
     "port": 50051,
     "name": "user-service"
@@ -20,5 +20,10 @@
   "consul": {
     "host": "192.168.1.103",
     "port": 8500
+  },
+   "test": {
+    "host": "192.168.1.103",
+    "port": 50051,
+    "name": "user-service"
   }
 }
